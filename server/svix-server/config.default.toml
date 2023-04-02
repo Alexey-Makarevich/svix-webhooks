@@ -42,8 +42,10 @@ db_tracing = false
 # The wanted retry schedule in seconds. Each value is the time to wait between retries.
 retry_schedule = [5,300,1800,7200,18000,36000,36000]
 
-# The DSN for the database. Only postgres is currently supported.
-db_dsn = "postgresql://postgres:postgres@pgbouncer/postgres"
+## The DSN for the database. Only postgres is currently supported.
+#db_dsn = "postgresql://postgres:postgres@pgbouncer/postgres"
+# The DSN for the database. Only MySql is currently supported.
+db_dsn = "mysql://svix:svix@localhost:3306/svix"
 
 # The maximum number of connections for the PostgreSQL pool. Minimum value is 10.
 # Higher values can significantly increase performance if your database can handle it.

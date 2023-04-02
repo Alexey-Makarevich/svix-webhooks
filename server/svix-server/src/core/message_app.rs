@@ -68,7 +68,7 @@ impl CreateMessageApp {
     /// requisite information, fetch it from PostgreSQL and insert the data into the cache.
     pub async fn layered_fetch(
         cache: &Cache,
-        pg: &DatabaseConnection,
+        pg: &DatabaseConnection,                  //  this is not pg but connection from sea-orm by cfg
         app: Option<application::Model>,
         org_id: OrganizationId,
         app_id: ApplicationId,

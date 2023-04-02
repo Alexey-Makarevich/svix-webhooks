@@ -14,3 +14,11 @@ target/
 Session.vim
 
 .env
+
+
+# IDEA
+.idea
+
+# gradle
+.gradle
+

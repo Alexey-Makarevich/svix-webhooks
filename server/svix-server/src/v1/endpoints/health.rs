@@ -86,7 +86,7 @@ async fn health(
     // SELECT 1 FROM any table
     let database: HealthStatus = db
         .execute(Statement::from_string(
-            DatabaseBackend::Postgres,
+            DatabaseBackend::MySql,
             "SELECT 1".to_owned(),
         ))
         .await
