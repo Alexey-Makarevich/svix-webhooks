@@ -14,16 +14,31 @@ pub async fn clean_expired_messages(
     pool: &DatabaseConnection,
     limit: u32,
 ) -> std::result::Result<UpdateResult, DbErr> {
+
+    // FOR UPDATE SKIP LOCKED -- this works only for PostgreSQL
+    // FOR UPDATE -- using this variant for MySql
+
+    // LIMIT $1
+    // in MySql got "2023-04-04T12:49:14.373669Z ERROR svix_server::expired_message_cleaner: Execution Error: error returned from database: 1327 (42000): Undeclared variable: $1"
+    // making LIMIT 5000
+
+    // 2023-04-04T13:02:34.033407Z ERROR svix_server::expired_message_cleaner: Execution Error: error returned from database: 1235 (42000): This version of MySQL doesn't yet suppo
+    // SQL Error [1235] [42000]: This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
+    // see
+    // https://stackoverflow.com/questions/17892762/mysql-this-version-of-mysql-doesnt-yet-support-limit-in-all-any-some-subqu
+    // for a dirty hack    select * from ( select ... limit ...  ) temp_tab
+
+
     let stmt = Statement::from_sql_and_values(
         pool.get_database_backend(),
         r#"
         UPDATE message SET payload = NULL WHERE id IN (
-            SELECT id FROM message
+            select * from ( SELECT id FROM message
             WHERE
                 expiration <= now()
                 AND payload IS NOT NULL
-            LIMIT $1
-            FOR UPDATE SKIP LOCKED
+            LIMIT 5000
+            FOR UPDATE ) temp_tab
         )
     "#,
         [limit.into()],
