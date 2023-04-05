@@ -37,7 +37,7 @@ pub async fn clean_expired_messages(
             WHERE
                 expiration <= now()
                 AND payload IS NOT NULL
-            LIMIT $1
+            LIMIT 5000
             FOR UPDATE ) temp_tab
         )
     "#,
