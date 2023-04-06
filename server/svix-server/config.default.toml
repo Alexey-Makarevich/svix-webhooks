@@ -47,6 +47,14 @@ retry_schedule = [5,300,1800,7200,18000,36000,36000]
 # The DSN for the database. Only MySql is currently supported.
 db_dsn = "mysql://svix:svix@localhost:3306/svix"
 
+# DSN for cluster = ????
+# SVIX_REDIS_DSN: "redis://redis-cluster:6379,redis-cluster-node-0:6379,redis-cluster-node-1:6379,redis-cluster-node-2:6379,redis-cluster-node-3:6379,redis-cluster-node-4:6379"
+# 20230405-svix-redis-cluster-backend-1  | thread 'main' panicked at 'Expected Redis host', svix-server/src/wait_for.rs:13:28
+
+# SVIX_REDIS_DSN: "redis://redis-cluster:6379/,redis://redis-cluster-node-0:6379/,redis://redis-cluster-node-1:6379/,redis://redis-cluster-node-2:6379/,redis://redis-cluster-node-3:6379/,redis://redis-cluster-node-4:6379/"
+# 20230405-svix-redis-cluster-backend-1  | thread 'main' panicked at 'Error initializing redis cluster client: Invalid database number', /app/svix-server/src/redis/mod.rs:264:14
+
+
 # The maximum number of connections for the PostgreSQL pool. Minimum value is 10.
 # Higher values can significantly increase performance if your database can handle it.
 db_pool_max_size = 20

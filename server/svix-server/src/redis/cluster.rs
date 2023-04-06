@@ -17,7 +17,11 @@ impl RedisClusterConnectionManager {
         info: T,
     ) -> Result<RedisClusterConnectionManager, RedisError> {
         Ok(RedisClusterConnectionManager {
-            client: Client::open(vec![info])?,
+            // client: Client::open(vec![info])?,
+
+            // # SVIX_REDIS_DSN: "redis://redis-cluster:6379/,redis://redis-cluster-node-0:6379/,redis://redis-cluster-node-1:6379/,redis://redis-cluster-node-2:6379/,redis://redis-cluster-node-3:6379/,redis://redis-cluster-node-4:6379/"
+
+            client: Client::open(vec!["redis://redis-cluster:6379/", "redis://redis-cluster-node-0:6379/", "redis://redis-cluster-node-1:6379/", "redis://redis-cluster-node-2:6379/", "redis://redis-cluster-node-3:6379/", "redis://redis-cluster-node-4:6379/"])?,
         })
     }
 }
@@ -46,3 +50,14 @@ impl bb8::ManageConnection for RedisClusterConnectionManager {
         false
     }
 }
+
+// see https://github.com/svix/redis-cluster-async
+// fn client_open_test() {
+//     let nodes = vec!["redis://127.0.0.1:6379/", "redis://127.0.0.1:6378/", "redis://127.0.0.1:6377/"];
+//
+//     let mut runtime = tokio::runtime::Runtime::new().unwrap();
+//
+//     let client = Client::open(nodes).unwrap();
+// }
+
+
