@@ -261,7 +261,9 @@ async fn new_redis_pool_helper(
 ) -> RedisPool {
     if clustered {
         // let mgr = RedisClusterConnectionManager::new(redis_dsn)
-        let mgr = RedisClusterConnectionManager::new(redis_dsn.split(","))
+        //#0 4.201 264 |         let mgr = RedisClusterConnectionManager::new(redis_dsn.split(","))
+        // #0 4.201     |                   ---------------------------------- ^^^^^^^^^^^^^^^^^^^^ expected struct `std::vec::Vec`, found struct `std::str::Split`
+        let mgr = RedisClusterConnectionManager::new(redis_dsn.split(",").collect())
             .expect("Error initializing redis cluster client");
         let pool = bb8::Pool::builder()
             .max_size(max_connections.into())

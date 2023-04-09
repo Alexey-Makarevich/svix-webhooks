@@ -14,7 +14,8 @@ pub struct RedisClusterConnectionManager {
 
 impl RedisClusterConnectionManager {
     pub fn new<T: IntoConnectionInfo>(
-        info: T,
+        // info: T,
+        initial_nodes: Vec<T>,
     ) -> Result<RedisClusterConnectionManager, RedisError> {
         Ok(RedisClusterConnectionManager {
             // client: Client::open(vec![info])?,
@@ -104,7 +105,13 @@ impl RedisClusterConnectionManager {
             // with this variant all is working
 
             // added split in redis/mod.rs:264
-            client: Client::open(vec![info])?,
+            // #0 7.701 264 |         let mgr = RedisClusterConnectionManager::new(redis_dsn.split(","))
+            // #0 7.701     |                   ---------------------------------- ^^^^^^^^^^^^^^^^^^^^ the trait `IntoConnectionInfo` is not implemented for `std::str::Split<'_, &str>`
+            // client: Client::open(vec![info])?,
+
+
+            client: Client::open(initial_nodes)?,
+
 
         })
     }
