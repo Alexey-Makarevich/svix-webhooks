@@ -260,7 +260,8 @@ async fn new_redis_pool_helper(
     max_connections: u16,
 ) -> RedisPool {
     if clustered {
-        let mgr = RedisClusterConnectionManager::new(redis_dsn)
+        // let mgr = RedisClusterConnectionManager::new(redis_dsn)
+        let mgr = RedisClusterConnectionManager::new(redis_dsn.split(","))
             .expect("Error initializing redis cluster client");
         let pool = bb8::Pool::builder()
             .max_size(max_connections.into())
