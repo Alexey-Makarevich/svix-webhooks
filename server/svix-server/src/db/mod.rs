@@ -6,7 +6,6 @@ use sea_orm::{
     SqlxMySqlConnector,
 };
 
-// !!!!
 use sqlx::mysql::MySqlPoolOptions;
 
 use crate::{cfg::Configuration, core::types::OrganizationId};
@@ -17,8 +16,8 @@ use models::{application, endpoint, eventtype, message, messageattempt, messaged
 static MIGRATIONS: sqlx::migrate::Migrator = sqlx::migrate!();
 
 async fn connect(dsn: &str, max_pool_size: u16) -> sqlx::Pool<sqlx::MySql> {
-    if DbBackend::MySql.is_prefix_of(dsn) {   // !!!!
-        MySqlPoolOptions::new()   // !!!!
+    if DbBackend::MySql.is_prefix_of(dsn) {
+        MySqlPoolOptions::new()
             .max_connections(max_pool_size.into())
             .connect(dsn)
             .await

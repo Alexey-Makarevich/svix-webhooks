@@ -20,9 +20,6 @@ mod wait_for;
 use wait_for::wait_for_dsn;
 
 // The names and default ports of services to wait-for
-// !!!!!!
-// const POSTGRES_NAME: &str = "PostgreSQL";
-// const POSTGRES_PORT: u16 = 5432;
 const MYSQL_NAME: &str = "MySql";
 const MYSQL_PORT: u16 = 3306;
 
@@ -109,8 +106,6 @@ async fn main() {
         let mut wait_for = Vec::with_capacity(2);
         wait_for.push(wait_for_dsn(
             &cfg.db_dsn,
-            // POSTGRES_NAME,
-            // POSTGRES_PORT,
             MYSQL_NAME,
             MYSQL_PORT,
             wait_for_seconds,

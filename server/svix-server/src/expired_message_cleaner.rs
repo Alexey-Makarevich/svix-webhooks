@@ -24,8 +24,7 @@ pub async fn clean_expired_messages(
 
     // 2023-04-04T13:02:34.033407Z ERROR svix_server::expired_message_cleaner: Execution Error: error returned from database: 1235 (42000): This version of MySQL doesn't yet suppo
     // SQL Error [1235] [42000]: This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
-    // see
-    // https://stackoverflow.com/questions/17892762/mysql-this-version-of-mysql-doesnt-yet-support-limit-in-all-any-some-subqu
+    // see https://stackoverflow.com/questions/17892762/mysql-this-version-of-mysql-doesnt-yet-support-limit-in-all-any-some-subqu
     // for a dirty hack    select * from ( select ... limit ...  ) temp_tab
 
 
