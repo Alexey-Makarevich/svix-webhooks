@@ -1,0 +1,247 @@
+version: "3.7"
+services:
+  backend:
+    # https://github.com/bldsoft/svix-webhooks
+    # cd server
+    # docker build -t svix-server-mysql:latest .
+    image: svix-server-mysql:latest
+    environment:
+      # We want to wait for the default services
+      WAIT_FOR: "true"
+
+      # The address to listen on
+      # listen_address = "0.0.0.0:8071"
+
+      # The address of the Svix server to use for sending operational webhooks (disabled when omitted/null)
+      # Operational webhooks (otherwise known as "incoming webhooks"), are webhooks
+      # send from the Svix server to you, to let you know when some events happen.
+      # For a list of supported events please refer to: https://api.svix.com/docs#tag/Webhooks
+      # operational_webhook_address = "http://127.0.0.1:8071"  ### !!! is commented by default
+
+      # The main secret used by Svix. Used for client-side encryption of sensitive data, etc.
+      # IMPORTANT: Once set, it can't be changed.
+      # main_secret = "kPafCtH7KC351nWXQb2pEGa6IRW3OsYpzQJldB8X"   ### !!! is commented by default
+
+      # The JWT secret for authentication - should be secret and securely generated
+      SVIX_JWT_SECRET: "x"
+
+      # This determines the type of key that is generated for endpoint secrets by default (when none is set).
+      # Supported: hmac256 (default), ed25519
+      # Note: this does not affect existing keys, which will continue signing based on the type they were created with.
+      # default_signature_type = "hmac256"
+
+      # The log level to run the service with. Supported: info, debug, trace
+      SVIX_LOG_LEVEL: "trace"
+      # The log format that all output will follow. Supported: default, json
+      # log_format = "default"
+
+      # The OpenTelemetry address to send trace information to. Disabled when omitted/null.
+      # opentelemetry_address = "http://localhost:4317"   ### !!! is commented by default
+      # The ratio at which to sample spans when sending to OpenTelemetry. When not given it defaults to
+      # always sending. If the OpenTelemetry address is not set, this will do nothing.
+      # opentelemetry_sample_ratio = 1.0     ### !!! is commented by default
+
+      # The wanted retry schedule in seconds. Each value is the time to wait between retries.
+      # retry_schedule = [5,300,1800,7200,18000,36000,36000]
+
+      # Whether to enable the logging of the databases at the configured log level. This may be useful for analyzing their response times. Default=false 
+      # SVIX_DB_TRACING: "true"
+      # The DSN for the database. Only MySql is supported in setplex fork.
+      # here is MySql in docker network
+      SVIX_DB_DSN: "mysql://root:debezium@mysqlsrc:3306/svix2"
+      # The maximum number of connections for the DB pool. Minimum value is 10.
+      # Higher values can significantly increase performance if your database can handle it.
+      # db_pool_max_size = 20
+
+
+      # The defualt DSN for redis. `queue_dsn` and `cache_dsn` with take precedence over this value.
+      # (can be left empty if not using redis or if Redis is configured through the queue and/or cache
+      # specific DSNs)
+      # SVIX_REDIS_DSN: "redis://redis:6379"
+      # NO!!! # SVIX_REDIS_DSN: "redis-cluster:6379,redis-cluster-node-0:6379,redis-cluster-node-1:6379,redis-cluster-node-2:6379,redis-cluster-node-3:6379,redis-cluster-node-4:6379"
+      # NO!!! # SVIX_REDIS_DSN: "redis://redis-cluster:6379,redis://redis-cluster-node-0:6379,redis://redis-cluster-node-1:6379,redis://redis-cluster-node-2:6379,redis://redis-cluster-node-3:6379,redis://redis-cluster-node-4:6379"
+      # YES!!!!! Connection to all nodes
+      SVIX_REDIS_DSN: "redis://redis-cluster:6379/,redis://redis-cluster-node-0:6379/,redis://redis-cluster-node-1:6379/,redis://redis-cluster-node-2:6379/,redis://redis-cluster-node-3:6379/,redis://redis-cluster-node-4:6379/"
+      # YES!!!!! Connection to one node
+      # SVIX_REDIS_DSN: "redis://redis-cluster:6379/"
+      # The maximum number of connections for the Redis pool. Minimum value of 10
+      # Higher values can significantly increase performance if your database can handle it.
+      # redis_pool_max_size = 20
+
+      # What kind of message queue to use. Supported: memory, redis, rediscluster
+      # Redis backends must have a redis_dsn or queue_dsn configured, and it's highly recommended to
+      # enable persistence in redis so that a server restart doesn't wipe the queue.
+      # SVIX_QUEUE_TYPE: "redis"
+      SVIX_QUEUE_TYPE: "rediscluster"
+      # The DSN for the Redis-backed queue. Overrides `redis_dsn`. (can be left empty if not using redis)
+      # queue_dsn = "redis://redis:6379"    ### !!! is commented by default
+
+      # What kind of cache to use. Supported: memory, redis, rediscluster, none.
+      # Redis backends must have a redis_dsn or cache_dsn configured.
+      # The memory backend is recommended if you only have one instance running (not including workers). If you have
+      # multiple API servers running, please use the redis backend or some functionality, (e.g. Idempotency)
+      # may fail to work correctly.
+      # SVIX_CACHE_TYPE: "redis"
+      SVIX_CACHE_TYPE: "rediscluster"
+      # The DSN for the Redis-backed cache. Overrides `redis_dsn`. (can be left empty if not using redis)
+      # cache_dsn = "redis://redis:6379"     ### !!! is commented by default
+
+      # If true, headers are prefixed with `Webhook-`, otherwise with `Svix-` (default).
+      # whitelabel_headers = false
+
+      # If true, only allow https endpoints, otherwise also allow http.
+      # endpoint_https_only = false
+
+      # How long of a period an endpoint must be consistently failing to be disabled. If a message is
+      # successfully sent during this time, then the endpoint will not disable. Measured in hours.
+      # endpoint_failure_disable_after = 120
+
+      # How long to wait when making a request (in seconds)
+      # worker_request_timeout = 30
+
+      # Should this instance run the API
+      # api_enabled = true
+
+      # Should this instance run the message worker
+      # worker_enabled = true
+
+      # Subnets to whitelist for outbound webhooks. Note that allowing endpoints in private IP space
+      # is a security risk and should only be allowed if you are using the service internally or for
+      # testing purposes. Should be specified in CIDR notation, e.g., `[127.0.0.1/32, 172.17.0.0/16, 192.168.0.0/16]`
+      # whitelist_subnets = []
+      # SVIX_WHITELIST_SUBNETS: "[127.0.0.1/32]"
+
+      # Maximum number of concurrent worker tasks to spawn (0 is unlimited)
+      # worker_max_tasks = 500
+
+      RUST_BACKTRACE: "full"
+
+    ports:
+      - "8071:8071"
+    depends_on:
+      # - mysql
+      # - redis
+      - redis-cluster
+    networks:
+      - svix-net
+
+  backend2:
+    image: svix-server-mysql:latest
+    environment:
+      WAIT_FOR: "true"
+      SVIX_JWT_SECRET: "x"
+      SVIX_LOG_LEVEL: "debug"
+      SVIX_DB_DSN: "mysql://root:debezium@mysqlsrc:3306/svix2"
+      SVIX_REDIS_DSN: "redis://redis-cluster:6379/,redis://redis-cluster-node-0:6379/,redis://redis-cluster-node-1:6379/,redis://redis-cluster-node-2:6379/,redis://redis-cluster-node-3:6379/,redis://redis-cluster-node-4:6379/"
+      SVIX_QUEUE_TYPE: "rediscluster"
+      SVIX_CACHE_TYPE: "rediscluster"
+    ports:
+      - "8072:8071"
+    depends_on:
+      - redis-cluster
+    networks:
+      - svix-net      
+
+  # using existing db root:debezium@192.168.1.133:3306/svix1
+  # mysql:
+  #   image: mysql:8.0
+  #   ports:
+  #    - 3316:3306
+  #   environment:
+  #    - MYSQL_ROOT_PASSWORD=svix
+  #    - MYSQL_USER=svix
+  #    - MYSQL_PASSWORD=svix
+  #   volumes:
+  #    - "./.mysqlsrc-data/db:/var/lib/mysql"
+  #   cap_add:
+  #    - SYS_NICE  # CAP_SYS_NICE
+
+
+  # redis:
+  #   image: "redis:6.2-alpine"
+  #   ports:
+  #     - "6379:6379"
+  #   # Enable persistence
+  #   command: "--save 60 500 --appendonly yes --appendfsync everysec"
+  #   volumes:
+  #     - "./redis-data:/data"
+  #   networks:
+  #     - svix-net 
+
+
+  # Redis cluster
+  redis-cluster:
+    image: "bitnami/redis-cluster:6.2"
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+      REDIS_NODES: "redis-cluster redis-cluster-node-0 redis-cluster-node-1 redis-cluster-node-2 redis-cluster-node-3 redis-cluster-node-4"
+      REDIS_CLUSTER_CREATOR: "yes"
+      REDIS_CLUSTER_REPLICAS: "1"
+    ports:
+      - "6380:6379"
+    depends_on:
+      - redis-cluster-node-0
+      - redis-cluster-node-1
+      - redis-cluster-node-2
+      - redis-cluster-node-3
+      - redis-cluster-node-4
+    networks:
+      - svix-net
+
+  redis-cluster-node-0:
+    image: "bitnami/redis-cluster:6.2"
+    ports:
+      - "6381:6379"
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+      REDIS_NODES: "redis-cluster redis-cluster-node-0 redis-cluster-node-1 redis-cluster-node-2 redis-cluster-node-3 redis-cluster-node-4"
+    networks:
+      - svix-net
+
+  redis-cluster-node-1:
+    image: "bitnami/redis-cluster:6.2"
+    ports:
+      - "6382:6379"
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+      REDIS_NODES: "redis-cluster redis-cluster-node-0 redis-cluster-node-1 redis-cluster-node-2 redis-cluster-node-3 redis-cluster-node-4"
+    networks:
+      - svix-net
+
+  redis-cluster-node-2:
+    image: "bitnami/redis-cluster:6.2"
+    ports:
+      - "6383:6379"
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+      REDIS_NODES: "redis-cluster redis-cluster-node-0 redis-cluster-node-1 redis-cluster-node-2 redis-cluster-node-3 redis-cluster-node-4"
+    networks:
+      - svix-net
+
+  redis-cluster-node-3:
+    image: "bitnami/redis-cluster:6.2"
+    ports:
+      - "6384:6379"
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+      REDIS_NODES: "redis-cluster redis-cluster-node-0 redis-cluster-node-1 redis-cluster-node-2 redis-cluster-node-3 redis-cluster-node-4"
+    networks:
+      - svix-net
+
+  redis-cluster-node-4:
+    image: "bitnami/redis-cluster:6.2"
+    ports:
+      - "6385:6379"
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+      REDIS_NODES: "redis-cluster redis-cluster-node-0 redis-cluster-node-1 redis-cluster-node-2 redis-cluster-node-3 redis-cluster-node-4"
+    networks:
+      - svix-net
+
+# volumes:
+#   redis-data:
+
+
+networks:
+  svix-net:
+    name: svix-net
