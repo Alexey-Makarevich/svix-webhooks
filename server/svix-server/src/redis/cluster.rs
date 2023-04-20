@@ -17,7 +17,15 @@ impl RedisClusterConnectionManager {
         initial_nodes: Vec<T>,
     ) -> Result<RedisClusterConnectionManager, RedisError> {
         Ok(RedisClusterConnectionManager {
-            client: Client::open(initial_nodes)?,
+            // client: Client::open(initial_nodes)?,
+
+            // client: Client::open(vec!["redis://redis-cluster:6379/", "redis://redis-cluster-node-0:6379/", "redis://redis-cluster-node-1:6379/", "redis://redis-cluster-node-2:6379/", "redis://redis-cluster-node-3:6379/", "redis://redis-cluster-node-4:6379/"])?,
+            // with this variant all is working
+
+            // test connection to redis cluster with ACL
+
+            client: Client::open(vec!["redis://svix:svixpass@redis-cluster:6379/", "redis://svix:svixpass@redis-cluster-node-0:6379/", "redis://svix:svixpass@redis-cluster-node-1:6379/", "redis://svix:svixpass@redis-cluster-node-2:6379/", "redis://svix:svixpass@redis-cluster-node-3:6379/", "redis://svix:svixpass@redis-cluster-node-4:6379/"])?,
+
         })
     }
 }
