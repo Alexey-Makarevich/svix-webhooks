@@ -1,9 +1,12 @@
-use std::ops::DerefMut;
+use std::ops::{Deref, DerefMut};
 
-use axum::async_trait;
+// use axum::async_trait;
+use bb8::PooledConnection;
 
 use redis::{ErrorKind, IntoConnectionInfo, RedisError};
 use redis_cluster_async::Client;
+
+use async_trait::async_trait;
 
 /// ConnectionManager that implements `bb8::ManageConnection` and supports
 /// asynchronous clustered connections via `redis_cluster_async::Connection`
@@ -35,20 +38,34 @@ impl bb8::ManageConnection for RedisClusterConnectionManager {
     type Connection = redis_cluster_async::Connection;
     type Error = RedisError;
 
+    // async fn connect(&self) -> Result<Self::Connection, Self::Error> {
+    //     self.client.get_connection().await
+    // }
+
     async fn connect(&self) -> Result<Self::Connection, Self::Error> {
-        self.client.get_connection().await
+        self.client.get_connection().await.into()
     }
 
-    async fn is_valid(
-        &self,
-        conn: &mut bb8::PooledConnection<'_, Self>,
-    ) -> Result<(), Self::Error> {
-        let pong: String = redis::cmd("PING").query_async(conn.deref_mut()).await?;
+    async fn is_valid(&self, conn: &mut Self::Connection) -> Result<(), Self::Error> {
+        let pong: String = redis::cmd("PING").query_async(&mut *conn).await?;
         match pong.as_str() {
             "PONG" => Ok(()),
             _ => Err((ErrorKind::ResponseError, "ping request").into()),
         }
     }
+
+
+    // async fn is_valid(&self, conn: &mut bb8::PooledConnection<'_, Self>, ) -> Result<(), Self::Error> {
+    //     let pong: String = redis::cmd("PING").query_async(conn.deref_mut()).await?;
+    //     match pong.as_str() {
+    //         "PONG" => Ok(()),
+    //         _ => Err((ErrorKind::ResponseError, "ping request").into()),
+    //     }
+    // }
+
+
+
+
 
     fn has_broken(&self, _: &mut Self::Connection) -> bool {
         false
