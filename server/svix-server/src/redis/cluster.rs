@@ -22,6 +22,13 @@ impl RedisClusterConnectionManager {
         Ok(RedisClusterConnectionManager {
             // client: Client::open(initial_nodes)?,
 
+            //  let cfg = crate::cfg::load().unwrap();
+            ////////    async fn get_pool(redis_dsn: &str, cfg: &crate::cfg::Configuration)
+            //  let redis_pool = get_pool(cfg.redis_dsn.as_ref().unwrap().as_str(), &cfg).await;
+            // let mgr = RedisClusterConnectionManager::new(redis_dsn.split(",").collect())
+            ////  initial_nodes === vec!["redis://svix:svixpass@redis-cluster:6379/", "redis://svix:svixpass@redis-cluster-node-0:6379/", "redis://svix:svixpass@redis-cluster-node-1:6379/", "redis://svix:svixpass@redis-cluster-node-2:6379/", "redis://svix:svixpass@redis-cluster-node-3:6379/", "redis://svix:svixpass@redis-cluster-node-4:6379/"]
+            ////
+
             // client: Client::open(vec!["redis://redis-cluster:6379/", "redis://redis-cluster-node-0:6379/", "redis://redis-cluster-node-1:6379/", "redis://redis-cluster-node-2:6379/", "redis://redis-cluster-node-3:6379/", "redis://redis-cluster-node-4:6379/"])?,
             // with this variant all is working
 
