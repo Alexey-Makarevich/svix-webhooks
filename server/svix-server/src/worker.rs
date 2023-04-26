@@ -75,7 +75,7 @@ pub struct FailureCacheValue {
     pub first_failure_at: DateTimeUtc,
 }
 
-kv_def!(FailureCacheKey, FailureCacheValue, "SVIX_FAILURE_CACHE");
+kv_def!(FailureCacheKey, FailureCacheValue, "svix:SVIX_FAILURE_CACHE");
 
 impl FailureCacheKey {
     pub fn new(

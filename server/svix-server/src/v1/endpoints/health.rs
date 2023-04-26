@@ -98,7 +98,7 @@ async fn health(
     // Set a cache value with an expiration to ensure it works
     let cache: HealthStatus = cache
         .set(
-            &HealthCheckCacheKey("health_check_value".to_owned()),
+            &HealthCheckCacheKey("svix:health_check_value".to_owned()),
             &HealthCheckCacheValue(()),
             // Expires after this time, so it won't pollute the DB
             Duration::from_millis(100),

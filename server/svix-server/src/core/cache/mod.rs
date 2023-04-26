@@ -39,7 +39,7 @@ type Result<T> = std::result::Result<T, Error>;
 
 /// A valid key value for the cache -- usually just a wrapper around a [`String`]
 pub trait CacheKey: AsRef<str> + Send + Sync {
-    const PREFIX_CACHE: &'static str = "SVIX_CACHE";
+    const PREFIX_CACHE: &'static str = "svix:SVIX_CACHE";
 }
 /// Any (de)serializable structure usuable as a value in the cache -- it is associated with a
 /// given key type to ensure type checking on creation or reading of values from the cache

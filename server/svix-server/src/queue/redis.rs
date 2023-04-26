@@ -55,23 +55,23 @@ use super::{
 
 /// This is the key of the main queue. As a KV store, redis places the entire stream under this key.
 /// Confusingly, each message in the queue may have any number of KV pairs.
-const MAIN: &str = "svix:"+"{queue}_svix_v3_main";
+const MAIN: &str = "svix:{queue}_svix_v3_main";
 
 /// The key for the DELAYED queue in which scheduled messages are placed. This is the same DELAYED
 /// queue as v2 of the queue implementation.
-const DELAYED: &str = "svix:"+"{queue}_svix_delayed";
+const DELAYED: &str = "svix:{queue}_svix_delayed";
 
 /// The key for the lock guarding the delayed queue background task.
-const DELAYED_LOCK: &str = "svix:"+"{queue}_svix_delayed_lock";
+const DELAYED_LOCK: &str = "svix:{queue}_svix_delayed_lock";
 
 // v2 KEY CONSTANTS
-const LEGACY_V2_MAIN: &str = "svix:"+"{queue}_svix_main";
-const LEGACY_V2_PROCESSING: &str = "svix:"+"{queue}_svix_processing";
+const LEGACY_V2_MAIN: &str = "svix:{queue}_svix_main";
+const LEGACY_V2_PROCESSING: &str = "svix:{queue}_svix_processing";
 
 // v1 KEY CONSTANTS
-const LEGACY_V1_MAIN: &str = "svix:"+"svix_queue_main";
-const LEGACY_V1_PROCESSING: &str = "svix:"+"svix_queue_processing";
-const LEGACY_V1_DELAYED: &str = "svix:"+"svix_queue_delayed";
+const LEGACY_V1_MAIN: &str = "svix:svix_queue_main";
+const LEGACY_V1_PROCESSING: &str = "svix:svix_queue_processing";
+const LEGACY_V1_DELAYED: &str = "svix:svix_queue_delayed";
 
 /// Consumer group name constant -- each consumer group is able to read and acknowledge messages
 /// from the queue, and messages are read by all consumer groups.
