@@ -29,7 +29,7 @@ lazy_static! {
         redis_prefix.to_owned()
     };
 
-    static ref REDISPREFIX_AND_PREFIX_CACHE: String = REDISPREFIX.as_str().to_owned() + &"SVIX_CACHE".to_string();
+    // static ref REDISPREFIX_AND_PREFIX_CACHE: String = REDISPREFIX.as_str().to_owned() + &"SVIX_CACHE".to_string();
 
 }
 
@@ -58,7 +58,7 @@ type Result<T> = std::result::Result<T, Error>;
 
 /// A valid key value for the cache -- usually just a wrapper around a [`String`]
 pub trait CacheKey: AsRef<str> + Send + Sync {
-    const PREFIX_CACHE: &'static str = "svix:SVIX_CACHE";
+    const PREFIX_CACHE: &'static str = "SVIX_CACHE";
     // const PREFIX_CACHE: &'static str;
     // fn redis_prefix(&self) -> String {
     //     // prefix
@@ -122,39 +122,6 @@ macro_rules! kv_def {
     };
 }
 pub(crate) use kv_def;
-
-
-
-
-
-
-
-
-/// A macro that creates a [`CacheKey`] and ties it to any value that implements
-/// [`DeserializeOwned`] and [`Serialize`]
-macro_rules! kv_def1 {
-    ($key_id:ident, $val_struct:ident, $lit_prefix:expr) => {
-        crate::core::cache::kv_def_inner!($key_id, $val_struct);
-
-        impl CacheKey for $key_id {
-            const PREFIX_CACHE: &'static str = $lit_prefix;
-        }
-    };
-
-    ($key_id:ident, $val_struct:ident) => {
-        crate::core::cache::kv_def_inner!($key_id, $val_struct);
-
-        impl CacheKey for $key_id {
-           // const PREFIX_CACHE: &'static str = "svix:SVIX_CACHE";
-        }
-    };
-}
-pub(crate) use kv_def1;
-
-
-
-
-
 
 /// An inner macro which defines everything common to the below macro. Not really meant to be used,
 /// but it can't be made private or else it couldn't be used in the outer macro.
@@ -360,7 +327,7 @@ pub mod tests {
 
         println!("REDISPREFIX={}", super::REDISPREFIX.as_str());
 
-        println!("REDISPREFIX_AND_PREFIX_CACHE={}", super::REDISPREFIX_AND_PREFIX_CACHE.as_str());
+        // println!("REDISPREFIX_AND_PREFIX_CACHE={}", super::REDISPREFIX_AND_PREFIX_CACHE.as_str());
 
 
         println!("End test");

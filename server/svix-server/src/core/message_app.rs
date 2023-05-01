@@ -236,12 +236,12 @@ impl TryFrom<endpoint::Model> for CreateMessageEndpoint {
     }
 }
 
-kv_def!(AppEndpointKey, CreateMessageApp, "svix:SVIX_CACHE"); // !!!!!
+kv_def!(AppEndpointKey, CreateMessageApp, "SVIX_CACHE"); // !!!!!
 impl AppEndpointKey {
     // FIXME: Rewrite doc comment when AppEndpointValue members are known
     /// Returns a key for fetching all cached endpoints for a given organization and application.
     pub fn new(org: &OrganizationId, app: &ApplicationId) -> AppEndpointKey {
-        AppEndpointKey(format!("{}_APP_v3_{}_{}", Self::PREFIX_CACHE, org, app))  // !!!!!!!!!!
+        AppEndpointKey(format!("{}{}_APP_v3_{}_{}", REDISPREFIX.as_str().to_owned(), Self::PREFIX_CACHE, org, app))  // !!!!!!!!!!
     }
 }
 

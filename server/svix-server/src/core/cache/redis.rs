@@ -113,28 +113,28 @@ mod tests {
 
     #[derive(Deserialize, Serialize, Debug, PartialEq)]
     struct TestValA(usize);
-    kv_def!(TestKeyA, TestValA, "svix:SVIX_CACHE");
+    kv_def!(TestKeyA, TestValA, "SVIX_CACHE");
     impl TestKeyA {
         fn new(id: String) -> TestKeyA {
-            TestKeyA(format!("svix:SVIX_TEST_KEY_A_{id}"))
+            TestKeyA(format!("{}SVIX_TEST_KEY_A_{id}", REDISPREFIX.as_str().to_owned()))
         }
     }
 
     #[derive(Deserialize, Serialize, Debug, PartialEq)]
     struct TestValB(String);
-    kv_def!(TestKeyB, TestValB, "svix:SVIX_CACHE");
+    kv_def!(TestKeyB, TestValB, "SVIX_CACHE");
     impl TestKeyB {
         fn new(id: String) -> TestKeyB {
-            TestKeyB(format!("svix:SVIX_TEST_KEY_B_{id}"))
+            TestKeyB(format!("{}SVIX_TEST_KEY_B_{id}", REDISPREFIX.as_str().to_owned()))
         }
     }
 
     #[derive(Deserialize, Serialize, Debug, PartialEq)]
     struct StringTestVal(String);
-    string_kv_def!(StringTestKey, StringTestVal, "svix:SVIX_CACHE");
+    string_kv_def!(StringTestKey, StringTestVal, "SVIX_CACHE");
     impl StringTestKey {
         fn new(id: String) -> StringTestKey {
-            StringTestKey(format!("svix:SVIX_TEST_KEY_STRING_{id}"))
+            StringTestKey(format!("{}SVIX_TEST_KEY_STRING_{id}", REDISPREFIX.as_str().to_owned()))
         }
     }
 

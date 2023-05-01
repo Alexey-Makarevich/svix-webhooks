@@ -79,7 +79,7 @@ enum SerializedResponse {
     },
 }
 
-kv_def!(IdempotencyKey, SerializedResponse, "svix:SVIX_IDEMPOTENCY_CACHE"); // !!!!!
+kv_def!(IdempotencyKey, SerializedResponse, "SVIX_IDEMPOTENCY_CACHE"); // !!!!!
 
 impl IdempotencyKey {
     fn new(auth_token: &str, key: &str, url: &str) -> IdempotencyKey {

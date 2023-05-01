@@ -144,7 +144,7 @@ mod tests {
     kv_def!(TestKeyA, TestValA);
     impl TestKeyA {
         fn new(id: String) -> TestKeyA {
-            TestKeyA(format!("svix:SVIX_TEST_KEY_A_{id}"))
+            TestKeyA(format!("{}SVIX_TEST_KEY_A_{id}", REDISPREFIX.as_str().to_owned()))
         }
     }
 
@@ -153,7 +153,7 @@ mod tests {
     kv_def!(TestKeyB, TestValB);
     impl TestKeyB {
         fn new(id: String) -> TestKeyB {
-            TestKeyB(format!("svix:SVIX_TEST_KEY_B_{id}"))
+            TestKeyB(format!("{}SVIX_TEST_KEY_B_{id}", REDISPREFIX.as_str().to_owned()))
         }
     }
 
@@ -162,7 +162,7 @@ mod tests {
     string_kv_def!(StringTestKey, StringTestVal);
     impl StringTestKey {
         fn new(id: String) -> StringTestKey {
-            StringTestKey(format!("svix:SVIX_TEST_KEY_STRING_{id}"))
+            StringTestKey(format!("{}SVIX_TEST_KEY_STRING_{id}", REDISPREFIX.as_str().to_owned()))
         }
     }
 
@@ -183,7 +183,7 @@ mod tests {
 
     #[derive(Deserialize, Serialize, Debug, PartialEq)]
     struct TestValC(usize);
-    kv_def!(TestKeyC, TestValC, "svix:SVIX_CACHE-CCC");
+    kv_def!(TestKeyC, TestValC, "SVIX_CACHE-CCC");
     impl TestKeyC {
         fn new(id: String) -> TestKeyC {
             TestKeyC(format!("{}SVIX_TEST_KEY_C_{id}", REDISPREFIX.as_str().to_owned()))

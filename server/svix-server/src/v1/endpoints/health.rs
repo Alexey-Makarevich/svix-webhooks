@@ -17,7 +17,6 @@ use crate::{
 
 use crate::cfg::Configuration;
 use lazy_static::lazy_static;
-use crate::core::cache::kv_def1;
 
 
 lazy_static! {
@@ -104,8 +103,13 @@ pub struct HealthReport {
 
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
 struct HealthCheckCacheValue(());
-kv_def!(HealthCheckCacheKey, HealthCheckCacheValue, "svix:SVIX_CACHE"); // !!!!!
-// kv_def1!(HealthCheckCacheKey, HealthCheckCacheValue, self::REDISPREFIX.as_str()); // !!!!!
+kv_def!(HealthCheckCacheKey, HealthCheckCacheValue, "SVIX_CACHE"); // !!!!!!!!!!
+impl HealthCheckCacheKey {
+    fn new() -> HealthCheckCacheKey {
+        HealthCheckCacheKey(format!("{}SVIX_CACHE", REDISPREFIX.as_str().to_owned()))
+    }
+}
+
 
 async fn health(
     State(AppState {
@@ -130,7 +134,7 @@ async fn health(
     // Set a cache value with an expiration to ensure it works
     let cache: HealthStatus = cache
         .set(
-            &HealthCheckCacheKey("svix:health_check_value".to_owned()), // !!!!!
+            &HealthCheckCacheKey(format!("{}health_check_value", REDISPREFIX.as_str().to_owned())), // !!!!!!!!!!
             &HealthCheckCacheValue(()),
             // Expires after this time, so it won't pollute the DB
             Duration::from_millis(100),
