@@ -71,6 +71,9 @@ db_pool_max_size = 20
 # specific DSNs)
 redis_dsn = "redis://redis:6379"
 
+# The prefix for redis - default should be "svix:" but can be more concrete, for ex "svix:dev:"
+redis_prefix = "svix:"
+
 # The maximum number of connections for the Redis pool. Minimum value of 10
 # Higher values can significantly increase performance if your database can handle it.
 redis_pool_max_size = 20

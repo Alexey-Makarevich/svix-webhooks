@@ -291,7 +291,7 @@ pub async fn new_redis_pool(redis_dsn: &str, cfg: &Configuration) -> RedisPool {
 
 #[cfg(test)]
 mod tests {
-
+    // use tracing::{event, Level};  // do not work in tests
     use super::*;
     use crate::cfg::CacheType;
 
@@ -308,6 +308,10 @@ mod tests {
         dotenv::dotenv().ok();
         let cfg = crate::cfg::load().unwrap();
 
+        // tracing::error!("SSSSSSS");  // do not work in tests
+        // event!(Level::WARN, "something happened");  // do not work in tests
+        println!("SSAAAAAAAAA");
+
         let pool = get_pool(cfg.redis_dsn.as_ref().unwrap().as_str(), &cfg).await;
         let mut pool = pool.get().await.unwrap();
 
@@ -316,6 +320,10 @@ mod tests {
             pool.query_async::<()>(redis::Cmd::set::<String, usize>(key.clone(), val))
                 .await
                 .unwrap();
+
+            println!("key={} val={}", key, val);
+
+
             assert_eq!(
                 pool.query_async::<usize>(redis::Cmd::get(&key))
                     .await

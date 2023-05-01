@@ -14,6 +14,37 @@ use crate::{
     AppState,
 };
 
+
+use crate::cfg::Configuration;
+use lazy_static::lazy_static;
+use crate::core::cache::kv_def1;
+
+
+lazy_static! {
+
+    static ref REDISPREFIX: String ={
+        dotenv::dotenv().ok();
+        let cfg = crate::cfg::load().unwrap();
+        let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
+        redis_prefix.to_owned()
+    };
+
+    // static ref MAIN: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_v3_main".to_string();
+    // static ref DELAYED: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_delayed".to_string();
+    // static ref DELAYED_LOCK: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_delayed_lock".to_string();
+    // static ref LEGACY_V2_MAIN: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_main".to_string();
+    // static ref LEGACY_V2_PROCESSING: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_processing".to_string();
+    // static ref LEGACY_V1_MAIN: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_main".to_string();
+    // static ref LEGACY_V1_PROCESSING: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_processing".to_string();
+    // static ref LEGACY_V1_DELAYED: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_delayed".to_string();
+
+}
+
+
+
+
+
+
 async fn ping() -> StatusCode {
     StatusCode::NO_CONTENT
 }
@@ -73,7 +104,8 @@ pub struct HealthReport {
 
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
 struct HealthCheckCacheValue(());
-kv_def!(HealthCheckCacheKey, HealthCheckCacheValue);
+kv_def!(HealthCheckCacheKey, HealthCheckCacheValue, "svix:SVIX_CACHE"); // !!!!!
+// kv_def1!(HealthCheckCacheKey, HealthCheckCacheValue, self::REDISPREFIX.as_str()); // !!!!!
 
 async fn health(
     State(AppState {
@@ -98,7 +130,7 @@ async fn health(
     // Set a cache value with an expiration to ensure it works
     let cache: HealthStatus = cache
         .set(
-            &HealthCheckCacheKey("svix:health_check_value".to_owned()),
+            &HealthCheckCacheKey("svix:health_check_value".to_owned()), // !!!!!
             &HealthCheckCacheValue(()),
             // Expires after this time, so it won't pollute the DB
             Duration::from_millis(100),
@@ -126,4 +158,34 @@ pub fn router() -> ApiRouter<AppState> {
     ApiRouter::new()
         .route("/health/ping/", get(ping).head(ping))
         .route("/health/", get(health).head(health))
+}
+
+
+
+#[cfg(test)]
+mod tests {
+
+
+    // testtttttt
+    #[tokio::test]
+    async fn test_set_read_key_with_prefix() {
+        dotenv::dotenv().ok();
+        let cfg = crate::cfg::load().unwrap();
+
+
+        println!("Start test");
+
+        println!("redis_dsn from cfg = {}", cfg.redis_dsn.as_ref().unwrap().as_str());
+
+        println!("redis_prefix from cfg = {}", cfg.redis_prefix.as_ref().unwrap().as_str());
+
+
+        println!("REDISPREFIX={}", super::REDISPREFIX.as_str());
+
+
+        println!("End test");
+    }
+
+
+
 }

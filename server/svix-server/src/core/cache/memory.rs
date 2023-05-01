@@ -13,6 +13,31 @@ use std::sync::Arc;
 
 use super::{Cache, CacheBehavior, CacheKey, Result};
 
+
+
+
+use crate::cfg::Configuration;
+use lazy_static::lazy_static;
+
+
+lazy_static! {
+
+    static ref REDISPREFIX: String ={
+        dotenv::dotenv().ok();
+        let cfg = crate::cfg::load().unwrap();
+        let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
+        redis_prefix.to_owned()
+    };
+
+}
+
+
+
+
+
+
+
+
 #[derive(Debug)]
 struct ValueWrapper {
     value: Vec<u8>,
@@ -154,12 +179,26 @@ mod tests {
         }
     }
 
+
+
+    #[derive(Deserialize, Serialize, Debug, PartialEq)]
+    struct TestValC(usize);
+    kv_def!(TestKeyC, TestValC, "svix:SVIX_CACHE-CCC");
+    impl TestKeyC {
+        fn new(id: String) -> TestKeyC {
+            TestKeyC(format!("{}SVIX_TEST_KEY_C_{id}", REDISPREFIX.as_str().to_owned()))
+        }
+    }
+
+
+
+
     #[tokio::test]
     async fn test_cache_crud_no_ttl() {
         let cache = new();
 
         let (first_key, first_val_a, first_val_b) =
-            (TestKeyA::new("1".to_owned()), TestValA(1), TestValA(2));
+            (TestKeyA::new("1".to_owned()), TestValA(1), TestValA(2));                // !!!!!!!!!!!!!!!!!!!!  проверить что new таки перебивает кей!!! тогда просто в new будем подсовывать в обход константы цельный ключ из нашего префикса и ихнего
         let (second_key, second_val_a, second_val_b) = (
             TestKeyB::new("1".to_owned()),
             TestValB("1".to_owned()),
@@ -261,4 +300,30 @@ mod tests {
 
         assert!(cache.delete(&key).await.is_ok());
     }
+
+    #[tokio::test]
+    async fn test_key_println() {
+
+        // !!!!!!!!!!!!!!!!!!!!  проверить что new таки перебивает кей!!! тогда просто в new будем подсовывать в обход константы цельный ключ из нашего префикса и ихнего
+
+        let key = TestKeyA::new("1".to_owned());
+        println!("key={}",key.as_ref());
+
+
+
+        let key = TestKeyA::new("key".to_owned());
+        println!("key={}",key.as_ref());
+
+        let key = TestKeyA::new("nx_status_test_key".to_owned());
+        println!("key={}",key.as_ref());
+
+
+        let key = TestKeyC::new("c1c2c3".to_owned());
+        println!("key={}",key.as_ref());
+
+    }
+
+
+
+
 }

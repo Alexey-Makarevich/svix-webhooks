@@ -49,29 +49,53 @@ use super::{
     TaskQueueSend,
 };
 
+use crate::cfg::Configuration;
+use lazy_static::lazy_static;
+
+
+lazy_static! {
+
+    static ref REDISPREFIX: String ={
+        dotenv::dotenv().ok();
+        let cfg = crate::cfg::load().unwrap();
+        let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
+        redis_prefix.to_owned()
+    };
+
+    static ref MAIN: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_v3_main".to_string();
+    static ref DELAYED: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_delayed".to_string();
+    static ref DELAYED_LOCK: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_delayed_lock".to_string();
+    static ref LEGACY_V2_MAIN: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_main".to_string();
+    static ref LEGACY_V2_PROCESSING: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_processing".to_string();
+    static ref LEGACY_V1_MAIN: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_main".to_string();
+    static ref LEGACY_V1_PROCESSING: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_processing".to_string();
+    static ref LEGACY_V1_DELAYED: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_delayed".to_string();
+
+}
+
 
 // here we need prefix "svix:"
 // but it would be preferable to have prefixes like "svix:pid:"
 
 /// This is the key of the main queue. As a KV store, redis places the entire stream under this key.
 /// Confusingly, each message in the queue may have any number of KV pairs.
-const MAIN: &str = "svix:{queue}_svix_v3_main";
+// const MAIN: &str = "svix:{queue}_svix_v3_main";
 
 /// The key for the DELAYED queue in which scheduled messages are placed. This is the same DELAYED
 /// queue as v2 of the queue implementation.
-const DELAYED: &str = "svix:{queue}_svix_delayed";
+// const DELAYED: &str = "svix:{queue}_svix_delayed";
 
 /// The key for the lock guarding the delayed queue background task.
-const DELAYED_LOCK: &str = "svix:{queue}_svix_delayed_lock";
+// const DELAYED_LOCK: &str = "svix:{queue}_svix_delayed_lock";
 
 // v2 KEY CONSTANTS
-const LEGACY_V2_MAIN: &str = "svix:{queue}_svix_main";
-const LEGACY_V2_PROCESSING: &str = "svix:{queue}_svix_processing";
+// const LEGACY_V2_MAIN: &str = "svix:{queue}_svix_main";
+// const LEGACY_V2_PROCESSING: &str = "svix:{queue}_svix_processing";
 
 // v1 KEY CONSTANTS
-const LEGACY_V1_MAIN: &str = "svix:svix_queue_main";
-const LEGACY_V1_PROCESSING: &str = "svix:svix_queue_processing";
-const LEGACY_V1_DELAYED: &str = "svix:svix_queue_delayed";
+// const LEGACY_V1_MAIN: &str = "svix:svix_queue_main";
+// const LEGACY_V1_PROCESSING: &str = "svix:svix_queue_processing";
+// const LEGACY_V1_DELAYED: &str = "svix:svix_queue_delayed";
 
 /// Consumer group name constant -- each consumer group is able to read and acknowledge messages
 /// from the queue, and messages are read by all consumer groups.
@@ -102,9 +126,9 @@ pub async fn new_pair(
         pool,
         Duration::from_secs(45),
         prefix.unwrap_or_default(),
-        MAIN,
-        DELAYED,
-        DELAYED_LOCK,
+        MAIN.as_str(),
+        DELAYED.as_str(),
+        DELAYED_LOCK.as_str(),
     )
     .await
 }
@@ -594,8 +618,8 @@ impl TaskQueueReceive for RedisQueueConsumer {
 }
 
 async fn migrate_v2_to_v3_queues(pool: &mut PooledConnection<'_>) -> Result<()> {
-    migrate_list_to_stream(pool, LEGACY_V2_MAIN, MAIN).await?;
-    migrate_list_to_stream(pool, LEGACY_V2_PROCESSING, MAIN).await?;
+    migrate_list_to_stream(pool, LEGACY_V2_MAIN.as_str(), MAIN.as_str()).await?;
+    migrate_list_to_stream(pool, LEGACY_V2_PROCESSING.as_str(), MAIN.as_str()).await?;
 
     Ok(())
 }
@@ -633,9 +657,9 @@ async fn migrate_list_to_stream(
 }
 
 async fn migrate_v1_to_v2_queues(pool: &mut PooledConnection<'_>) -> Result<()> {
-    migrate_list(pool, LEGACY_V1_MAIN, LEGACY_V2_MAIN).await?;
-    migrate_list(pool, LEGACY_V1_PROCESSING, LEGACY_V2_PROCESSING).await?;
-    migrate_sset(pool, LEGACY_V1_DELAYED, DELAYED).await?;
+    migrate_list(pool, LEGACY_V1_MAIN.as_str(), LEGACY_V2_MAIN.as_str()).await?;
+    migrate_list(pool, LEGACY_V1_PROCESSING.as_str(), LEGACY_V2_PROCESSING.as_str()).await?;
+    migrate_sset(pool, LEGACY_V1_DELAYED.as_str(), DELAYED.as_str()).await?;
 
     Ok(())
 }
@@ -705,6 +729,7 @@ pub mod tests {
         queue::{MessageTask, QueueTask, TaskQueueConsumer, TaskQueueDelivery, TaskQueueProducer},
         redis::{PoolLike, PooledConnectionLike, RedisPool},
     };
+    use crate::queue::redis::REDISPREFIX;
 
     pub async fn get_pool(cfg: Configuration) -> RedisPool {
         match cfg.cache_type {
@@ -1186,5 +1211,64 @@ pub mod tests {
             );
             p.ack(recv).await.unwrap();
         }
+    }
+
+
+    // testtttttt
+    #[tokio::test]
+    async fn test_set_read_key_with_prefix() {
+        dotenv::dotenv().ok();
+        let cfg = crate::cfg::load().unwrap();
+
+
+        println!("Start test");
+
+        println!("redis_dsn from cfg = {}", cfg.redis_dsn.as_ref().unwrap().as_str());
+
+        println!("redis_prefix from cfg = {}", cfg.redis_prefix.as_ref().unwrap().as_str());
+
+        let redis_prefix = cfg.redis_prefix.as_ref().unwrap().to_owned();
+
+        // let key = redis_prefix + &"key1234".to_string();
+        let key = REDISPREFIX.as_str().to_owned() + super::MAIN.as_str();
+
+        let pool = get_pool(cfg).await;
+        // get connection from pool
+        let mut conn = pool.get().await.expect("Error retreiving connection from Redis pool");
+
+        let val = 12;
+        conn.query_async::<()>(Cmd::set::<String, usize>(key.clone(), val))
+            .await
+            .unwrap();
+
+
+        println!("REDISPREFIX={}", REDISPREFIX.as_str());
+
+
+        println!("REDISPREFIX+MAIN={}", REDISPREFIX.as_str().to_owned() + super::MAIN.as_str());
+
+        println!("MAIN={}", super::MAIN.as_str());
+        println!("DELAYED={}", super::DELAYED.as_str());
+        println!("DELAYED_LOCK={}", super::DELAYED_LOCK.as_str());
+        println!("LEGACY_V2_MAIN={}", super::LEGACY_V2_MAIN.as_str());
+        println!("LEGACY_V2_PROCESSING={}", super::LEGACY_V2_PROCESSING.as_str());
+        println!("LEGACY_V1_MAIN={}", super::LEGACY_V1_MAIN.as_str());
+        println!("LEGACY_V1_PROCESSING={}", super::LEGACY_V1_PROCESSING.as_str());
+        println!("LEGACY_V1_DELAYED={}", super::LEGACY_V1_DELAYED.as_str());
+
+
+
+        //    static ref MAIN: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_v3_main".to_string();
+        //     static ref DELAYED: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_delayed".to_string();
+        //     static ref DELAYED_LOCK: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_delayed_lock".to_string();
+        //     static ref LEGACY_V2_MAIN: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_main".to_string();
+        //     static ref LEGACY_V2_PROCESSING: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_processing".to_string();
+        //     static ref LEGACY_V1_MAIN: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_main".to_string();
+        //     static ref LEGACY_V1_PROCESSING: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_processing".to_string();
+        //     static ref LEGACY_V1_DELAYED: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_delayed".to_string();
+
+
+
+        println!("End test");
     }
 }

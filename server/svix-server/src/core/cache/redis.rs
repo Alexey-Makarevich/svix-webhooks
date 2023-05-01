@@ -9,6 +9,32 @@ use crate::redis::{PoolLike, PooledConnectionLike, RedisPool};
 
 use super::{Cache, CacheBehavior, CacheKey, Error, Result};
 
+
+
+
+
+
+use crate::cfg::Configuration;
+use lazy_static::lazy_static;
+
+
+lazy_static! {
+
+    static ref REDISPREFIX: String ={
+        dotenv::dotenv().ok();
+        let cfg = crate::cfg::load().unwrap();
+        let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
+        redis_prefix.to_owned()
+    };
+
+}
+
+
+
+
+
+
+
 pub fn new(redis: RedisPool) -> Cache {
     RedisCache { redis }.into()
 }
@@ -87,7 +113,7 @@ mod tests {
 
     #[derive(Deserialize, Serialize, Debug, PartialEq)]
     struct TestValA(usize);
-    kv_def!(TestKeyA, TestValA);
+    kv_def!(TestKeyA, TestValA, "svix:SVIX_CACHE");
     impl TestKeyA {
         fn new(id: String) -> TestKeyA {
             TestKeyA(format!("svix:SVIX_TEST_KEY_A_{id}"))
@@ -96,7 +122,7 @@ mod tests {
 
     #[derive(Deserialize, Serialize, Debug, PartialEq)]
     struct TestValB(String);
-    kv_def!(TestKeyB, TestValB);
+    kv_def!(TestKeyB, TestValB, "svix:SVIX_CACHE");
     impl TestKeyB {
         fn new(id: String) -> TestKeyB {
             TestKeyB(format!("svix:SVIX_TEST_KEY_B_{id}"))
@@ -105,7 +131,7 @@ mod tests {
 
     #[derive(Deserialize, Serialize, Debug, PartialEq)]
     struct StringTestVal(String);
-    string_kv_def!(StringTestKey, StringTestVal);
+    string_kv_def!(StringTestKey, StringTestVal, "svix:SVIX_CACHE");
     impl StringTestKey {
         fn new(id: String) -> StringTestKey {
             StringTestKey(format!("svix:SVIX_TEST_KEY_STRING_{id}"))

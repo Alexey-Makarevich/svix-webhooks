@@ -24,6 +24,33 @@ use tower::Service;
 use super::cache::{kv_def, Cache, CacheBehavior, CacheKey, CacheValue};
 use crate::{err_database, error::Error};
 
+
+
+
+
+
+use crate::cfg::Configuration;
+use lazy_static::lazy_static;
+
+
+lazy_static! {
+
+    static ref REDISPREFIX: String ={
+        dotenv::dotenv().ok();
+        let cfg = crate::cfg::load().unwrap();
+        let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
+        redis_prefix.to_owned()
+    };
+
+}
+
+
+
+
+
+
+
+
 /// Returns the default exipry period for cached responses
 const fn expiry_default() -> Duration {
     Duration::from_secs(60 * 60 * 12)
@@ -52,7 +79,7 @@ enum SerializedResponse {
     },
 }
 
-kv_def!(IdempotencyKey, SerializedResponse, "svix:SVIX_IDEMPOTENCY_CACHE");
+kv_def!(IdempotencyKey, SerializedResponse, "svix:SVIX_IDEMPOTENCY_CACHE"); // !!!!!
 
 impl IdempotencyKey {
     fn new(auth_token: &str, key: &str, url: &str) -> IdempotencyKey {

@@ -46,6 +46,29 @@ use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
+
+
+
+
+// use crate::cfg::Configuration;
+// use lazy_static::lazy_static;
+
+lazy_static! {
+
+    static ref REDISPREFIX: String ={
+        dotenv::dotenv().ok();
+        let cfg = crate::cfg::load().unwrap();
+        let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
+        redis_prefix.to_owned()
+    };
+
+}
+
+
+
+
+
+
 pub type CaseSensitiveHeaderMap = HashMap<String, HeaderValue>;
 
 // The maximum variation from the retry schedule when applying jitter to a resent webhook event in
@@ -75,7 +98,7 @@ pub struct FailureCacheValue {
     pub first_failure_at: DateTimeUtc,
 }
 
-kv_def!(FailureCacheKey, FailureCacheValue, "svix:SVIX_FAILURE_CACHE");
+kv_def!(FailureCacheKey, FailureCacheValue, "svix:SVIX_FAILURE_CACHE");  // !!!!!
 
 impl FailureCacheKey {
     pub fn new(
@@ -85,7 +108,7 @@ impl FailureCacheKey {
     ) -> FailureCacheKey {
         FailureCacheKey(format!(
             "{}_{}_{}_{}",
-            Self::PREFIX_CACHE,
+            Self::PREFIX_CACHE,     // !!!!!!!!!!
             org_id,
             app_id,
             endp_id

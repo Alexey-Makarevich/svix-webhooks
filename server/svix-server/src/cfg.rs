@@ -138,6 +138,11 @@ pub struct ConfigurationInner {
     #[validate(range(min = 10))]
     pub redis_pool_max_size: u16,
 
+
+    /// The prefix for redis - default should be "svix:" but can be more concrete, for ex "svix:dev:"
+    pub redis_prefix: Option<String>,
+    
+
     /// What kind of message queue to use. Supported: memory, redis (must have redis_dsn or
     /// queue_dsn configured).
     pub queue_type: QueueType,
