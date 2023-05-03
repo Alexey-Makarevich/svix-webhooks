@@ -68,6 +68,9 @@ services:
       # Higher values can significantly increase performance if your database can handle it.
       # redis_pool_max_size = 20
 
+      # The prefix for redis - default should be "svix:" but can be more concrete, for ex "svix:dev:"
+      SVIX_REDIS_PREFIX: "svix:"
+
       # What kind of message queue to use. Supported: memory, redis, rediscluster
       # Redis backends must have a redis_dsn or queue_dsn configured, and it's highly recommended to
       # enable persistence in redis so that a server restart doesn't wipe the queue.

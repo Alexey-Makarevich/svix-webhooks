@@ -198,7 +198,7 @@ mod tests {
         let cache = new();
 
         let (first_key, first_val_a, first_val_b) =
-            (TestKeyA::new("1".to_owned()), TestValA(1), TestValA(2));                // !!!!!!!!!!!!!!!!!!!!  проверить что new таки перебивает кей!!! тогда просто в new будем подсовывать в обход константы цельный ключ из нашего префикса и ихнего
+            (TestKeyA::new("1".to_owned()), TestValA(1), TestValA(2));
         let (second_key, second_val_a, second_val_b) = (
             TestKeyB::new("1".to_owned()),
             TestValB("1".to_owned()),
@@ -304,19 +304,16 @@ mod tests {
     #[tokio::test]
     async fn test_key_println() {
 
-        // !!!!!!!!!!!!!!!!!!!!  проверить что new таки перебивает кей!!! тогда просто в new будем подсовывать в обход константы цельный ключ из нашего префикса и ихнего
+        // check that new() forms the key and is the mechanism to be changed if we need it (for ex. add redis_prefix from config)
 
         let key = TestKeyA::new("1".to_owned());
         println!("key={}",key.as_ref());
-
-
 
         let key = TestKeyA::new("key".to_owned());
         println!("key={}",key.as_ref());
 
         let key = TestKeyA::new("nx_status_test_key".to_owned());
         println!("key={}",key.as_ref());
-
 
         let key = TestKeyC::new("c1c2c3".to_owned());
         println!("key={}",key.as_ref());

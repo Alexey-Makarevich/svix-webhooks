@@ -74,8 +74,9 @@ lazy_static! {
 }
 
 
-// here we need prefix "svix:"
-// but it would be preferable to have prefixes like "svix:pid:"
+// here we need prefixes like "svix:dev:" - they are provided in env or in cfg file ,
+// we can't use PID because Svix will be running in our cloud for many PIDs
+// and PIDs will be organizations in Svix configs
 
 /// This is the key of the main queue. As a KV store, redis places the entire stream under this key.
 /// Confusingly, each message in the queue may have any number of KV pairs.
@@ -1214,7 +1215,7 @@ pub mod tests {
     }
 
 
-    // testtttttt
+    // test get values from cfg and from cfg pub const
     #[tokio::test]
     async fn test_set_read_key_with_prefix() {
         dotenv::dotenv().ok();
@@ -1224,13 +1225,16 @@ pub mod tests {
         println!("Start test");
 
         println!("redis_dsn from cfg = {}", cfg.redis_dsn.as_ref().unwrap().as_str());
+        //  if redis clustered then redis_dsn will be split to Vec<&str>
 
-        println!("redis_prefix from cfg = {}", cfg.redis_prefix.as_ref().unwrap().as_str());
+        // println!("redis_prefix from cfg = {}", cfg.redis_prefix.as_ref().unwrap().as_str());
 
-        let redis_prefix = cfg.redis_prefix.as_ref().unwrap().to_owned();
+        // let redis_prefix = cfg.redis_prefix.as_ref().unwrap().to_owned();
+        let redis_prefix = crate::cfg::REDIS_PREFIX.to_owned();
+        println!("redis_prefix=crate::cfg::REDIS_PREFIX.to_owned()={}", redis_prefix);
 
         // let key = redis_prefix + &"key1234".to_string();
-        let key = REDISPREFIX.as_str().to_owned() + super::MAIN.as_str();
+        let key = redis_prefix.to_owned() + super::MAIN.as_str() + "_testKey";
 
         let pool = get_pool(cfg).await;
         // get connection from pool
@@ -1240,12 +1244,10 @@ pub mod tests {
         conn.query_async::<()>(Cmd::set::<String, usize>(key.clone(), val))
             .await
             .unwrap();
+        println!("Have set test key={} and val={}", key, val);
 
-
-        println!("REDISPREFIX={}", REDISPREFIX.as_str());
-
-
-        println!("REDISPREFIX+MAIN={}", REDISPREFIX.as_str().to_owned() + super::MAIN.as_str());
+        println!("REDIS_PREFIX={}", redis_prefix);
+        println!("REDIS_PREFIX+MAIN={}", redis_prefix.to_owned() + super::MAIN.as_str());
 
         println!("MAIN={}", super::MAIN.as_str());
         println!("DELAYED={}", super::DELAYED.as_str());
@@ -1255,18 +1257,6 @@ pub mod tests {
         println!("LEGACY_V1_MAIN={}", super::LEGACY_V1_MAIN.as_str());
         println!("LEGACY_V1_PROCESSING={}", super::LEGACY_V1_PROCESSING.as_str());
         println!("LEGACY_V1_DELAYED={}", super::LEGACY_V1_DELAYED.as_str());
-
-
-
-        //    static ref MAIN: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_v3_main".to_string();
-        //     static ref DELAYED: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_delayed".to_string();
-        //     static ref DELAYED_LOCK: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_delayed_lock".to_string();
-        //     static ref LEGACY_V2_MAIN: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_main".to_string();
-        //     static ref LEGACY_V2_PROCESSING: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_processing".to_string();
-        //     static ref LEGACY_V1_MAIN: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_main".to_string();
-        //     static ref LEGACY_V1_PROCESSING: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_processing".to_string();
-        //     static ref LEGACY_V1_DELAYED: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_delayed".to_string();
-
 
 
         println!("End test");

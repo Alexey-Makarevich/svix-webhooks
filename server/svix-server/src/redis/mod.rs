@@ -260,7 +260,7 @@ async fn new_redis_pool_helper(
     max_connections: u16,
 ) -> RedisPool {
     if clustered {
-        let mgr = RedisClusterConnectionManager::new(redis_dsn.split(",").collect())
+        let mgr = RedisClusterConnectionManager::new(redis_dsn.split(",").collect())  // initial_nodes: Vec<&str>
             .expect("Error initializing redis cluster client");
         let pool = bb8::Pool::builder()
             .max_size(max_connections.into())
@@ -310,7 +310,7 @@ mod tests {
 
         // tracing::error!("SSSSSSS");  // do not work in tests
         // event!(Level::WARN, "something happened");  // do not work in tests
-        println!("SSAAAAAAAAA");
+        // println!("SSAAAAAAAAA");
 
         let pool = get_pool(cfg.redis_dsn.as_ref().unwrap().as_str(), &cfg).await;
         let mut pool = pool.get().await.unwrap();
@@ -321,7 +321,7 @@ mod tests {
                 .await
                 .unwrap();
 
-            println!("key={} val={}", key, val);
+            // println!("key={} val={}", key, val);
 
 
             assert_eq!(

@@ -98,7 +98,7 @@ pub struct FailureCacheValue {
     pub first_failure_at: DateTimeUtc,
 }
 
-kv_def!(FailureCacheKey, FailureCacheValue, "SVIX_FAILURE_CACHE");  // !!!!!
+kv_def!(FailureCacheKey, FailureCacheValue, "SVIX_FAILURE_CACHE");
 
 impl FailureCacheKey {
     pub fn new(
@@ -109,7 +109,7 @@ impl FailureCacheKey {
         FailureCacheKey(format!(
             "{}{}_{}_{}_{}",
             REDISPREFIX.as_str().to_owned(),
-            Self::PREFIX_CACHE,     // !!!!!!!!!!
+            Self::PREFIX_CACHE,
             org_id,
             app_id,
             endp_id

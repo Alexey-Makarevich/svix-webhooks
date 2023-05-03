@@ -15,6 +15,17 @@ use serde::{Deserialize, Deserializer};
 use tracing::Level;
 use validator::{Validate, ValidationError};
 
+use lazy_static::lazy_static;
+
+lazy_static! {
+    pub static ref REDIS_PREFIX: String ={
+        dotenv::dotenv().ok();
+        let cfg = load().unwrap();
+        cfg.redis_prefix.as_ref().unwrap().to_owned()
+    };
+}
+
+
 fn deserialize_jwt_secret<'de, D>(deserializer: D) -> std::result::Result<Keys, D::Error>
 where
     D: Deserializer<'de>,
@@ -436,4 +447,13 @@ mod tests {
         assert_eq!(cfg.queue_backend(), QueueBackend::Redis("test_a"));
         assert_eq!(cfg.cache_backend(), CacheBackend::Redis("test_b"));
     }
+
+
+
+    #[test]
+    fn test_lazy_load_redisprefix() {
+
+        println!("REDIS_PREFIX={}", REDIS_PREFIX.to_owned());
+    }
+
 }

@@ -103,7 +103,7 @@ pub struct HealthReport {
 
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
 struct HealthCheckCacheValue(());
-kv_def!(HealthCheckCacheKey, HealthCheckCacheValue, "SVIX_CACHE"); // !!!!!!!!!!
+kv_def!(HealthCheckCacheKey, HealthCheckCacheValue, "SVIX_CACHE");
 impl HealthCheckCacheKey {
     fn new() -> HealthCheckCacheKey {
         HealthCheckCacheKey(format!("{}SVIX_CACHE", REDISPREFIX.as_str().to_owned()))
@@ -134,7 +134,7 @@ async fn health(
     // Set a cache value with an expiration to ensure it works
     let cache: HealthStatus = cache
         .set(
-            &HealthCheckCacheKey(format!("{}health_check_value", REDISPREFIX.as_str().to_owned())), // !!!!!!!!!!
+            &HealthCheckCacheKey(format!("{}health_check_value", REDISPREFIX.as_str().to_owned())),
             &HealthCheckCacheValue(()),
             // Expires after this time, so it won't pollute the DB
             Duration::from_millis(100),
@@ -183,10 +183,15 @@ mod tests {
 
         println!("redis_prefix from cfg = {}", cfg.redis_prefix.as_ref().unwrap().as_str());
 
+        //  redis_dsn=cfg.redis_dsn.as_ref().unwrap().as_str() redis_dsn.split(",").collect()
+        let initial_nodes: Vec<&str> = cfg.redis_dsn.as_ref().unwrap().as_str().split(",").collect();
+        println!("initial_nodes={}", initial_nodes.join(","));
+
+
 
         println!("REDISPREFIX={}", super::REDISPREFIX.as_str());
 
-
+        // println!("redis_prefix={}", &crate::cfg::Configuration::as_ref().redis_prefix);
         println!("End test");
     }
 
