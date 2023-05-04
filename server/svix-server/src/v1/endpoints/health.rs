@@ -15,35 +15,6 @@ use crate::{
 };
 
 
-use crate::cfg::Configuration;
-use lazy_static::lazy_static;
-
-
-lazy_static! {
-
-    static ref REDISPREFIX: String ={
-        dotenv::dotenv().ok();
-        let cfg = crate::cfg::load().unwrap();
-        let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
-        redis_prefix.to_owned()
-    };
-
-    // static ref MAIN: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_v3_main".to_string();
-    // static ref DELAYED: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_delayed".to_string();
-    // static ref DELAYED_LOCK: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_delayed_lock".to_string();
-    // static ref LEGACY_V2_MAIN: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_main".to_string();
-    // static ref LEGACY_V2_PROCESSING: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_processing".to_string();
-    // static ref LEGACY_V1_MAIN: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_main".to_string();
-    // static ref LEGACY_V1_PROCESSING: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_processing".to_string();
-    // static ref LEGACY_V1_DELAYED: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_delayed".to_string();
-
-}
-
-
-
-
-
-
 async fn ping() -> StatusCode {
     StatusCode::NO_CONTENT
 }
@@ -106,7 +77,7 @@ struct HealthCheckCacheValue(());
 kv_def!(HealthCheckCacheKey, HealthCheckCacheValue, "SVIX_CACHE");
 impl HealthCheckCacheKey {
     fn new() -> HealthCheckCacheKey {
-        HealthCheckCacheKey(format!("{}SVIX_CACHE", REDISPREFIX.as_str().to_owned()))
+        HealthCheckCacheKey(format!("{}SVIX_CACHE", crate::cfg::REDIS_PREFIX.to_owned()))
     }
 }
 
@@ -134,7 +105,7 @@ async fn health(
     // Set a cache value with an expiration to ensure it works
     let cache: HealthStatus = cache
         .set(
-            &HealthCheckCacheKey(format!("{}health_check_value", REDISPREFIX.as_str().to_owned())),
+            &HealthCheckCacheKey(format!("{}health_check_value", crate::cfg::REDIS_PREFIX.to_owned())),
             &HealthCheckCacheValue(()),
             // Expires after this time, so it won't pollute the DB
             Duration::from_millis(100),
@@ -181,17 +152,11 @@ mod tests {
 
         println!("redis_dsn from cfg = {}", cfg.redis_dsn.as_ref().unwrap().as_str());
 
-        println!("redis_prefix from cfg = {}", cfg.redis_prefix.as_ref().unwrap().as_str());
-
-        //  redis_dsn=cfg.redis_dsn.as_ref().unwrap().as_str() redis_dsn.split(",").collect()
         let initial_nodes: Vec<&str> = cfg.redis_dsn.as_ref().unwrap().as_str().split(",").collect();
         println!("initial_nodes={}", initial_nodes.join(","));
 
+        println!("redis_prefix from crate::cfg REDIS_PREFIX={}", crate::cfg::REDIS_PREFIX.to_owned());
 
-
-        println!("REDISPREFIX={}", super::REDISPREFIX.as_str());
-
-        // println!("redis_prefix={}", &crate::cfg::Configuration::as_ref().redis_prefix);
         println!("End test");
     }
 

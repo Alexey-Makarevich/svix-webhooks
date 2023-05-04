@@ -49,28 +49,18 @@ use super::{
     TaskQueueSend,
 };
 
-use crate::cfg::Configuration;
 use lazy_static::lazy_static;
 
 
 lazy_static! {
-
-    static ref REDISPREFIX: String ={
-        dotenv::dotenv().ok();
-        let cfg = crate::cfg::load().unwrap();
-        let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
-        redis_prefix.to_owned()
-    };
-
-    static ref MAIN: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_v3_main".to_string();
-    static ref DELAYED: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_delayed".to_string();
-    static ref DELAYED_LOCK: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_delayed_lock".to_string();
-    static ref LEGACY_V2_MAIN: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_main".to_string();
-    static ref LEGACY_V2_PROCESSING: String = REDISPREFIX.as_str().to_owned() + &"{queue}_svix_processing".to_string();
-    static ref LEGACY_V1_MAIN: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_main".to_string();
-    static ref LEGACY_V1_PROCESSING: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_processing".to_string();
-    static ref LEGACY_V1_DELAYED: String = REDISPREFIX.as_str().to_owned() + &"svix_queue_delayed".to_string();
-
+    static ref MAIN: String = crate::cfg::REDIS_PREFIX.to_owned() + &"{queue}_svix_v3_main".to_string();
+    static ref DELAYED: String = crate::cfg::REDIS_PREFIX.to_owned() + &"{queue}_svix_delayed".to_string();
+    static ref DELAYED_LOCK: String = crate::cfg::REDIS_PREFIX.to_owned() + &"{queue}_svix_delayed_lock".to_string();
+    static ref LEGACY_V2_MAIN: String = crate::cfg::REDIS_PREFIX.to_owned() + &"{queue}_svix_main".to_string();
+    static ref LEGACY_V2_PROCESSING: String = crate::cfg::REDIS_PREFIX.to_owned() + &"{queue}_svix_processing".to_string();
+    static ref LEGACY_V1_MAIN: String = crate::cfg::REDIS_PREFIX.to_owned() + &"svix_queue_main".to_string();
+    static ref LEGACY_V1_PROCESSING: String = crate::cfg::REDIS_PREFIX.to_owned() + &"svix_queue_processing".to_string();
+    static ref LEGACY_V1_DELAYED: String = crate::cfg::REDIS_PREFIX.to_owned() + &"svix_queue_delayed".to_string();
 }
 
 
@@ -730,7 +720,6 @@ pub mod tests {
         queue::{MessageTask, QueueTask, TaskQueueConsumer, TaskQueueDelivery, TaskQueueProducer},
         redis::{PoolLike, PooledConnectionLike, RedisPool},
     };
-    use crate::queue::redis::REDISPREFIX;
 
     pub async fn get_pool(cfg: Configuration) -> RedisPool {
         match cfg.cache_type {

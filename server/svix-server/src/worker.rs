@@ -47,28 +47,6 @@ use std::sync::Arc;
 use std::time::Duration;
 
 
-
-
-
-// use crate::cfg::Configuration;
-// use lazy_static::lazy_static;
-
-lazy_static! {
-
-    static ref REDISPREFIX: String ={
-        dotenv::dotenv().ok();
-        let cfg = crate::cfg::load().unwrap();
-        let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
-        redis_prefix.to_owned()
-    };
-
-}
-
-
-
-
-
-
 pub type CaseSensitiveHeaderMap = HashMap<String, HeaderValue>;
 
 // The maximum variation from the retry schedule when applying jitter to a resent webhook event in
@@ -108,7 +86,7 @@ impl FailureCacheKey {
     ) -> FailureCacheKey {
         FailureCacheKey(format!(
             "{}{}_{}_{}_{}",
-            REDISPREFIX.as_str().to_owned(),
+            crate::cfg::REDIS_PREFIX.to_owned(),
             Self::PREFIX_CACHE,
             org_id,
             app_id,

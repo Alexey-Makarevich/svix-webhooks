@@ -20,19 +20,6 @@ pub mod none;
 pub mod redis;
 
 
-lazy_static! {
-
-    static ref REDISPREFIX: String ={
-        dotenv::dotenv().ok();
-        let cfg = crate::cfg::load().unwrap();
-        let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
-        redis_prefix.to_owned()
-    };
-
-    // static ref REDISPREFIX_AND_PREFIX_CACHE: String = REDISPREFIX.as_str().to_owned() + &"SVIX_CACHE".to_string();
-
-}
-
 /// Errors internal to the cache
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -59,16 +46,6 @@ type Result<T> = std::result::Result<T, Error>;
 /// A valid key value for the cache -- usually just a wrapper around a [`String`]
 pub trait CacheKey: AsRef<str> + Send + Sync {
     const PREFIX_CACHE: &'static str = "SVIX_CACHE";
-    // const PREFIX_CACHE: &'static str;
-    // fn redis_prefix(&self) -> String {
-    //     // prefix
-    //     // dotenv::dotenv().ok();
-    //     // let cfg = crate::cfg::load().unwrap();
-    //     // let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
-    //     // redis_prefix
-    //     self::REDISPREFIX.as_str().to_owned()
-    // }
-    // REDISPREFIX_AND_PREFIX_CACHE!;
 }
 /// Any (de)serializable structure usuable as a value in the cache -- it is associated with a
 /// given key type to ensure type checking on creation or reading of values from the cache
@@ -90,10 +67,6 @@ macro_rules! kv_def_inner {
         impl AsRef<str> for $key_id {
             fn as_ref(&self) -> &str {
                 &self.0
-                // format!("{}{}", &self.prefix_cache(), &self.0 )
-                // format!("{}{}", &self.prefix_cache(), &self.0).as_str()
-                // &self.redis_prefix()
-                // self::REDISPREFIX.as_str()
             }
         }
 
@@ -314,21 +287,11 @@ pub mod tests {
     // testtttttt
     #[tokio::test]
     async fn test_with_prefix() {
-        dotenv::dotenv().ok();
-        let cfg = crate::cfg::load().unwrap();
-
+        // dotenv::dotenv().ok();
+        // let cfg = crate::cfg::load().unwrap();
         println!("Start test");
-
-        println!("redis_prefix from cfg = {}", cfg.redis_prefix.as_ref().unwrap().as_str());
-
-        // let redis_prefix = cfg.redis_prefix.as_ref().unwrap().to_owned();
-
-        // let key = super::REDISPREFIX.as_str().to_owned() + super::REDISPREFIX_AND_PREFIX_CACHE.as_str();
-
-        println!("REDISPREFIX={}", super::REDISPREFIX.as_str());
-
-        // println!("REDISPREFIX_AND_PREFIX_CACHE={}", super::REDISPREFIX_AND_PREFIX_CACHE.as_str());
-
+        // println!("redis_prefix from cfg = {}", cfg.redis_prefix.as_ref().unwrap().as_str());
+        println!("redis_prefix from cfg = {}", crate::cfg::REDIS_PREFIX.to_owned());
 
         println!("End test");
     }

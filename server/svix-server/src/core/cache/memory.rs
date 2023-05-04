@@ -14,30 +14,6 @@ use std::sync::Arc;
 use super::{Cache, CacheBehavior, CacheKey, Result};
 
 
-
-
-use crate::cfg::Configuration;
-use lazy_static::lazy_static;
-
-
-lazy_static! {
-
-    static ref REDISPREFIX: String ={
-        dotenv::dotenv().ok();
-        let cfg = crate::cfg::load().unwrap();
-        let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
-        redis_prefix.to_owned()
-    };
-
-}
-
-
-
-
-
-
-
-
 #[derive(Debug)]
 struct ValueWrapper {
     value: Vec<u8>,
@@ -144,7 +120,7 @@ mod tests {
     kv_def!(TestKeyA, TestValA);
     impl TestKeyA {
         fn new(id: String) -> TestKeyA {
-            TestKeyA(format!("{}SVIX_TEST_KEY_A_{id}", REDISPREFIX.as_str().to_owned()))
+            TestKeyA(format!("{}SVIX_TEST_KEY_A_{id}", crate::cfg::REDIS_PREFIX.to_owned()))
         }
     }
 
@@ -153,7 +129,7 @@ mod tests {
     kv_def!(TestKeyB, TestValB);
     impl TestKeyB {
         fn new(id: String) -> TestKeyB {
-            TestKeyB(format!("{}SVIX_TEST_KEY_B_{id}", REDISPREFIX.as_str().to_owned()))
+            TestKeyB(format!("{}SVIX_TEST_KEY_B_{id}", crate::cfg::REDIS_PREFIX.to_owned()))
         }
     }
 
@@ -162,7 +138,7 @@ mod tests {
     string_kv_def!(StringTestKey, StringTestVal);
     impl StringTestKey {
         fn new(id: String) -> StringTestKey {
-            StringTestKey(format!("{}SVIX_TEST_KEY_STRING_{id}", REDISPREFIX.as_str().to_owned()))
+            StringTestKey(format!("{}SVIX_TEST_KEY_STRING_{id}", crate::cfg::REDIS_PREFIX.to_owned()))
         }
     }
 
@@ -186,7 +162,7 @@ mod tests {
     kv_def!(TestKeyC, TestValC, "SVIX_CACHE-CCC");
     impl TestKeyC {
         fn new(id: String) -> TestKeyC {
-            TestKeyC(format!("{}SVIX_TEST_KEY_C_{id}", REDISPREFIX.as_str().to_owned()))
+            TestKeyC(format!("{}SVIX_TEST_KEY_C_{id}", crate::cfg::REDIS_PREFIX.to_owned()))
         }
     }
 

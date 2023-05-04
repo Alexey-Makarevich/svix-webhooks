@@ -26,32 +26,6 @@ use crate::{
 use super::types::EventTypeName;
 
 
-
-
-
-use crate::cfg::Configuration;
-use lazy_static::lazy_static;
-
-lazy_static! {
-
-    static ref REDISPREFIX: String ={
-        dotenv::dotenv().ok();
-        let cfg = crate::cfg::load().unwrap();
-        let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
-        redis_prefix.to_owned()
-    };
-
-}
-
-
-
-
-
-
-
-
-
-
 /// The information cached during the creation of a message. Includes a [`Vec`] of all endpoints
 /// associated with the given application and organization ID.
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -241,7 +215,7 @@ impl AppEndpointKey {
     // FIXME: Rewrite doc comment when AppEndpointValue members are known
     /// Returns a key for fetching all cached endpoints for a given organization and application.
     pub fn new(org: &OrganizationId, app: &ApplicationId) -> AppEndpointKey {
-        AppEndpointKey(format!("{}{}_APP_v3_{}_{}", REDISPREFIX.as_str().to_owned(), Self::PREFIX_CACHE, org, app))
+        AppEndpointKey(format!("{}{}_APP_v3_{}_{}", crate::cfg::REDIS_PREFIX.to_owned(), Self::PREFIX_CACHE, org, app))
     }
 }
 

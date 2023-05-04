@@ -25,32 +25,6 @@ use super::cache::{kv_def, Cache, CacheBehavior, CacheKey, CacheValue};
 use crate::{err_database, error::Error};
 
 
-
-
-
-
-use crate::cfg::Configuration;
-use lazy_static::lazy_static;
-
-
-lazy_static! {
-
-    static ref REDISPREFIX: String ={
-        dotenv::dotenv().ok();
-        let cfg = crate::cfg::load().unwrap();
-        let redis_prefix=cfg.redis_prefix.as_ref().unwrap(); //.to_owned();
-        redis_prefix.to_owned()
-    };
-
-}
-
-
-
-
-
-
-
-
 /// Returns the default exipry period for cached responses
 const fn expiry_default() -> Duration {
     Duration::from_secs(60 * 60 * 12)
@@ -92,7 +66,9 @@ impl IdempotencyKey {
         hasher.update(url);
 
         let res = hasher.finalize();
-        IdempotencyKey(base64::encode(res))
+        // IdempotencyKey(base64::encode(res))  // !!!!!!!!!! есть вероятность что тут тоже надо редис-префикс добавлять... - да, надо добавлять префикс - см тест test_set_key_to_redis_cache
+        IdempotencyKey(format!("{}{}", crate::cfg::REDIS_PREFIX.to_owned(), base64::encode(res)))
+
     }
 }
 
@@ -374,6 +350,7 @@ where
 #[cfg(test)]
 mod tests {
     use std::{net::TcpListener, sync::Arc};
+    use std::time::Duration;
 
     use axum::{extract::State, routing::post, Router, Server};
     use http::StatusCode;
@@ -387,6 +364,10 @@ mod tests {
         security::generate_org_token,
         types::{BaseId, OrganizationId},
     };
+    use crate::core::idempotency::{IdempotencyKey, SerializedResponse};
+
+    use crate::core::cache::CacheBehavior;
+
 
     #[derive(Clone)]
     struct TestAppState {
@@ -689,4 +670,68 @@ mod tests {
         //assert_eq!(resp_1.headers(), resp_2.headers());
         assert_eq!(resp_1.text().await.unwrap(), resp_2.text().await.unwrap());
     }
+
+    #[tokio::test]
+    async fn test_set_key_to_redis_cache() {
+        println!("Start test");
+
+        dotenv::dotenv().ok();
+        let cfg = crate::cfg::load().unwrap();
+
+
+        // !!! Attention - this is init for pool for 1 node
+        let mgr = crate::redis::new_redis_pool(cfg.redis_dsn.as_ref().unwrap().as_str(), &cfg).await;
+        let cache = cache::redis::new(mgr);
+
+
+        let token = generate_org_token(&cfg.jwt_secret, OrganizationId::new(None, None))
+            .unwrap()
+            .to_string();
+
+        println!("token={}", token);
+
+        let header_idempotency_key = "2";
+        let header_authorization = &token;
+        let uri= "https://test.com";
+
+        println!("header_idempotency_key={}   header_authorization={}   uri={}", header_idempotency_key, header_authorization,uri);
+
+        let idemp_key = IdempotencyKey::new(header_authorization, header_idempotency_key, &uri);
+        println!("idemp_key={}", idemp_key.0);
+
+        // see impl in core/cache/redis.rs:50
+        let result = cache
+            .set_if_not_exists(    //  returns Result<bool>
+                                   &idemp_key,
+                                   &SerializedResponse::Start,
+                                   Duration::from_secs(50000),
+            )
+            .await;
+
+        println!("result of setting to cache={}", result.unwrap());
+
+
+        let result = cache
+            .set_if_not_exists(    //  returns Result<bool>
+                                   &idemp_key,
+                                   &SerializedResponse::Start,
+                                   Duration::from_secs(50000),
+            )
+            .await;
+
+        println!("result 2 of setting to cache={}", result.unwrap());
+
+        println!("End test");
+
+        //Start test
+        // token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2ODMyMTgxMTYsImV4cCI6MTk5ODU3ODExNiwibmJmIjoxNjgzMjE4MTE2LCJpc3MiOiJzdml4LXNlcnZlciIsInN1YiI6Im9yZ18yUEt1VkkxZmJkOUZuZDZUOVdRVGc4Z2p1eWIifQ.Xugfb9dHdEb6pqZ9qYPw4tB38rClKEi-xYDyzdbP0-E
+        // header_idempotency_key=2   header_authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2ODMyMTgxMTYsImV4cCI6MTk5ODU3ODExNiwibmJmIjoxNjgzMjE4MTE2LCJpc3MiOiJzdml4LXNlcnZlciIsInN1YiI6Im9yZ18yUEt1VkkxZmJkOUZuZDZUOVdRVGc4Z2p1eWIifQ.Xugfb9dHdEb6pqZ9qYPw4tB38rClKEi-xYDyzdbP0-E   uri=https://test.com
+        // idemp_key=svix:dev:5Sw3cRm+GK8pffXGnHT/CfrbhBIJ1dQoREgdBRw016j4kAoIa7UUB3CE0kkLq47/6NDCSdLML2beUK4WJUaRwg==
+        // result of setting to cache=true
+        // result 2 of setting to cache=false
+        // End test
+
+    }
+
+
 }
