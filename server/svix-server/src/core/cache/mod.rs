@@ -10,11 +10,6 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::core::run_with_retries::run_with_retries;
 
-
-use crate::cfg::Configuration;
-use lazy_static::lazy_static;
-
-
 pub mod memory;
 pub mod none;
 pub mod redis;

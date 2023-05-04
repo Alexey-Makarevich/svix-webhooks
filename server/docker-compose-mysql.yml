@@ -58,12 +58,13 @@ services:
       # (can be left empty if not using redis or if Redis is configured through the queue and/or cache
       # specific DSNs)
       # SVIX_REDIS_DSN: "redis://redis:6379"
-      # NO!!! # SVIX_REDIS_DSN: "redis-cluster:6379,redis-cluster-node-0:6379,redis-cluster-node-1:6379,redis-cluster-node-2:6379,redis-cluster-node-3:6379,redis-cluster-node-4:6379"
-      # NO!!! # SVIX_REDIS_DSN: "redis://redis-cluster:6379,redis://redis-cluster-node-0:6379,redis://redis-cluster-node-1:6379,redis://redis-cluster-node-2:6379,redis://redis-cluster-node-3:6379,redis://redis-cluster-node-4:6379"
-      # YES!!!!! Connection to all nodes
-      SVIX_REDIS_DSN: "redis://redis-cluster:6379/,redis://redis-cluster-node-0:6379/,redis://redis-cluster-node-1:6379/,redis://redis-cluster-node-2:6379/,redis://redis-cluster-node-3:6379/,redis://redis-cluster-node-4:6379/"
-      # YES!!!!! Connection to one node
+      # DSN for cluster
+      # Connection to one node
       # SVIX_REDIS_DSN: "redis://redis-cluster:6379/"
+      # Connection to all nodes
+      SVIX_REDIS_DSN: "redis://redis-cluster:6379/,redis://redis-cluster-node-0:6379/,redis://redis-cluster-node-1:6379/,redis://redis-cluster-node-2:6379/,redis://redis-cluster-node-3:6379/,redis://redis-cluster-node-4:6379/"
+      # Connection to redis cluster to all nodes with ACL
+      # SVIX_REDIS_DSN: "redis://svix:svixpass@redis-cluster:6379/,redis://svix:svixpass@redis-cluster-node-0:6379/,redis://svix:svixpass@redis-cluster-node-1:6379/,redis://svix:svixpass@redis-cluster-node-2:6379/,redis://svix:svixpass@redis-cluster-node-3:6379/,redis://svix:svixpass@redis-cluster-node-4:6379/"
       # The maximum number of connections for the Redis pool. Minimum value of 10
       # Higher values can significantly increase performance if your database can handle it.
       # redis_pool_max_size = 20
